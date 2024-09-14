@@ -42,7 +42,7 @@ function calcular() {
         const qtdEtqIdentificacaoTE = qtdTotalTomadas  + ((numPontosTelecom + numPontosRede + numCftv) * numPavimentosMH);
         
         // MALHA HORIZONTAL
-        const qtdEtqIdentificacaoMH = qtdTotalTomadas;
+        const qtdEtqIdentificacaoMH = 2*qtdTotalTomadas; // Duas etiquetas, uma na entrada do cabo e outra na saída (lig. com tomanda // lig. com switch)
         
         // SALA DE EQUIPAMENTOS/TELECOM (SEQ/SET)
         const qtdPPMH = Math.ceil(qtdTotalTomadas / 24);
@@ -52,13 +52,26 @@ function calcular() {
 
         // MISCELÂNEA
 
+
+        // RACK
+        let quantidadeRack = 1; // toda rede precisa de pelo menos um
+
+        // adicionar pergunta de rack por andar...
+        const tamanhoRack = [ (qtdPPMH * 2) + (qtdPPMH * 2) ] * 1.5; // Tamanho do rack 
+        
+        if (tamanhoRack > 36) {
+            quantidadeRack  = Math.ceil(tamanhoRack/36)            
+            // Quantidade to rack / tamanho maximo, arredondando para o minimo maior inteiro de quantidade de rack
+
+        } else return;
+    
  
     let planilhaMH = '';
     let planilhaBackbone = '';
     
     // Geração da planilha de Malha Horizontal
     if (numPavimentosMH > 0 && (pontosTelecomSim || pontosRedeSim)) {
-        const tamanhoRack = (qtdPPMH * 2) + (qtdPPMH * 2);
+        
 
         planilhaMH += `<h3>Planilha de Malha Horizontal</h3>`;
         planilhaMH += `<table>
@@ -109,7 +122,7 @@ function calcular() {
                 <tr><td>Cordão óptico (especificação da fibra, núcleo e casca, duplo, tipo de conector, 2m, cor)</td><td>Unid.</td><td>1</td></tr>
                 <tr><td>Terminador Óptico (2, 4, 6 ou 8 fibras)</td><td>Unid.</td><td>1</td></tr>
                 <tr><td>Cabo Óptico (MM ou SM, núcleo e casca, Loose ou Tight Buffer, quantidade de fibras)</td><td>m</td><td>1</td></tr>
-                <tr><td>Rack (Aberto ou fechado, Tamanho: XXU)</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Rack (${tipoRack}, Tamanho: ${tamanhoRack}U)</td><td>Unid.</td><td>${quantidadeRack}</td></tr>
                 <tr><td>Bandeja fixa - 19" de largura</td><td>Unid.</td><td>1</td></tr>
                 <tr><td>Bandeja deslizante - 19" de largura</td><td>Unid.</td><td>1</td></tr>
                 <tr><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>1</td></tr>
