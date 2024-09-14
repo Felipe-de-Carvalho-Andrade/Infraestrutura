@@ -1,0 +1,269 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8; 
+    color: #333; 
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #0033cc; 
+    color: #ffffff; 
+    padding: 20px 40px; 
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); 
+    border-bottom: 1px solid #0044cc; 
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2em; 
+    font-weight: 600; 
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0; 
+    display: flex;
+    justify-content: center; 
+    gap: 20px; 
+}
+
+nav ul li {
+    margin: 0;
+}
+
+nav ul li a {
+    color: #ffffff; 
+    text-decoration: none;
+    font-weight: 600; 
+    font-size: 1em; 
+}
+
+nav ul li a:hover {
+    text-decoration: underline; 
+    color: #cccccc; 
+}
+
+main {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.form-box {
+    background-color: #ffffff; 
+    padding: 15px;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 260px;
+    max-width: 480px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 0 auto; 
+}
+
+h3 {
+    border-bottom: 2px solid #0033cc; 
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+article {
+    margin-bottom: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333; 
+}
+
+input[type="number"],
+input[type="text"] {
+    width: calc(100% - 12px);
+    padding: 6px;
+    border: 1px solid #ccc; 
+    border-radius: 5px;
+    font-size: 0.9em;
+    background-color: #ffffff; 
+    color: #333; 
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.radio-group {
+    display: flex;
+    gap: 10px;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+}
+
+button {
+    background-color: #0033cc; 
+    color: #ffffff; 
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: #002299; 
+}
+
+footer {
+    background-color: #0033cc; 
+    color: #ffffff; 
+    padding: 20px 40px; 
+    text-align: center; 
+    border-top: 1px solid #0044cc; 
+    margin-top: 20px; 
+}
+
+.footer-content {
+    max-width: 1200px; 
+    margin: 0 auto; 
+}
+
+footer p {
+    margin: 0; 
+    font-size: 1em; 
+}
+
+/* Tabela que é acrecentada (JS) ao se calcular a planilha */
+
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ccc; 
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #0033cc; 
+    color: #ffffff; 
+}
+
+tr:nth-child(even) {
+    background-color: #e6e6e6; 
+}
+
+tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+thead th {
+    background-color: #0033cc; 
+    color: #ffffff; 
+}
+
+
+/* Contâiner com as perguntas objetivas */
+.options-container {
+    display: flex;
+    gap: 20px; 
+}
+
+.options-article {
+    flex: 1; 
+    padding: 10px; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+    background-color: #f9f9f9; 
+}
+
+.options-label {
+    display: block; 
+    margin-bottom: 5px; 
+}
+
+.radio-group label {
+    display: inline-block; 
+    margin-right: 10px;
+}
+
+/* Campos escondidos */
+.hidden-fields {
+    display: none;
+    margin-bottom: 20px;
+}
+
+
+/* Ícone com as informações sobre os campos */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+    margin-left: px;
+}
+
+.tooltip-icon {
+    display: inline-block;
+    font-size: 1em; 
+    color: #0033cc; 
+    background-color: #ffffff; 
+    border-radius: 20%; 
+    width: 18px; 
+    height: 18px; 
+    text-align: center;
+    line-height: 18px; 
+    border: 2px solid #0033cc; 
+    font-weight: bold; 
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 300px;
+    background-color: #ffffff; 
+    color: #333; 
+    text-align: center;
+    border-radius: 8px; 
+    padding: 10px; 
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; 
+    left: 50%;
+    margin-left: -150px; 
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.9em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}

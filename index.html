@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Calculadora de Infraestrutura</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>Quantificação de Materiais - Infraestrutura de Rede</h1>
+            <nav>
+                <ul>
+                    <li><a href="#backbone">Backbone</a></li>
+                    <li><a href="#malha-horizontal">Malha Horizontal</a></li>
+                    <li><a href="#resultado">Resultado</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section id="formulario">
+                <h2>Formulários</h2>
+                <div class="form-container">
+                    <div class="form-box" id="backbone">
+                        <h3>Backbone</h3>
+                        <article>
+                            <label for="numPavimentosBackbone">Número de pavimentos:</label>
+                            <input type="number" id="numPavimentosBackbone">
+                        </article>
+                        <article>
+                            <label for="paresFibras">Número de pares de fibras:</label>
+                            <input type="number" id="paresFibras">
+                        </article>
+                        <article>
+                            <label for="medidaCabo">Distância média (m):</label>
+                            <input type="number" id="medidaCabo" step="0.01">
+                        </article>
+                        <article>
+                            <label for="especificacaoCabo">Especificação do cabo:</label>
+                            <input type="text" id="especificacaoCabo">
+                        </article>
+                        <article>
+                            <label for="caracteristicaFibra">Característica da fibra:</label>
+                            <input type="text" id="caracteristicaFibra">
+                        </article>
+                        <article>
+                            <label for="quantidadeBackbones">Backbones por andar:</label>
+                            <input type="number" id="quantidadeBackbones">
+                        </article>
+                        <div class="options-container">
+                            <article class="options-article">
+                                <label class="options-label">Há Backbone primário?</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="BackbonePrimario" value="sim" onclick="toggleFields('backbonePrimario', true)"> Sim</label>
+                                    <label><input type="radio" name="BackbonePrimario" value="nao" onclick="toggleFields('backbonePrimario', false)"> Não</label>
+                                </div>
+                            </article>
+                        </div>
+                        <div id="backbonePrimarioFields" class="hidden-fields">
+                            <label for="numBackbonePrimario">Distância entre os edifícios (m):</label>
+                            <input type="number" id="numBackbonePrimario" name="numBackbonePrimario">
+                        </div>
+                    
+                        <div class="options-container">
+                            <article class="options-article">
+                                <label class="options-label">Há Backbone secundário?</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="BackboneSecundario" value="sim" onclick="toggleFields('backboneSecundario', true)"> Sim</label>
+                                    <label><input type="radio" name="BackboneSecundario" value="nao" onclick="toggleFields('backboneSecundario', false)"> Não</label>
+                                </div>
+                            </article>
+                        </div>
+                        <div id="backboneSecundarioFields" class="hidden-fields">
+                            <label for="numBackboneSecundario">
+                                Altura dos andares (m):
+                                <span class="tooltip">
+                                    <span class="tooltip-icon">i</span> 
+                                    <span class="tooltiptext">Esse campo é referente ao pé-direito</span>
+                                </span>
+                            </label>
+                            <input type="number" id="numBackboneSecundario" name="numBackboneSecundario">
+                        </div>
+                        <div class="options-container">
+                            <article class="options-article">
+                                <label class="options-label">Tipo de rack para Backbone</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="tipoRackBB" value="Aberto"> Aberto</label>
+                                    <label><input type="radio" name="tipoRackBB" value="Fechado"> Fechado</label>
+                                </div>
+                            </article>
+                        </div>            
+                    </div>
+                    
+                    <div class="form-box" id="malha-horizontal">
+                        <h3>Malha Horizontal</h3>
+                        <article>
+                            <label for="numPavimentosMH">Número de pavimentos:</label>
+                            <input type="number" id="numPavimentosMH">
+                        </article>
+                        <article>
+                            <label for="medidaMH">Distância média (m):</label>
+                            <input type="number" id="medidaMH" step="0.01">
+                        </article>
+                        <article>
+                            <label for="especificacaoCategoria">Categoria do cabo par traçado:</label>
+                            <input type="text" id="especificacaoCategoria">
+                        </article>
+                        <article>
+                        <div class="options-container">
+                            <article class="options-article">
+                                <label class="options-label">Há pontos de telecom?</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="pontosTelecom" value="sim" onclick="toggleFields('pontosTelecom', true)"> Sim</label>
+                                    <label><input type="radio" name="pontosTelecom" value="nao" onclick="toggleFields('pontosTelecom', false)"> Não</label>
+                                </div>
+                            </article>
+                        </div>
+                    
+                        <div id="pontosTelecomFields" class="hidden-fields">
+                            <label for="numPontosTelecom">Número de pontos de telecom por andar:</label>
+                            <input type="number" id="numPontosTelecom" name="numPontosTelecom">
+                        </div>
+                    
+                        <div class="options-container">
+                            <article class="options-article">
+                                <label class="options-label">Há pontos de rede?</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="pontosRede" value="sim" onclick="toggleFields('pontosRede', true)"> Sim</label>
+                                    <label><input type="radio" name="pontosRede" value="nao" onclick="toggleFields('pontosRede', false)"> Não</label>
+                                </div>
+                            </article>
+                        </div>
+                    
+                        <div id="pontosRedeFields" class="hidden-fields">
+                            <label for="numPontosRede">Número de pontos de rede por andar:</label>
+                            <input type="number" id="numPontosRede" name="numPontosRede">
+                        </div>
+                    
+                        <div class="options-container">
+                            <article class="options-article">
+                                <label class="options-label">
+                                    Há um sistema VoIP?
+                                    <span class="tooltip">
+                                        <span class="tooltip-icon">i</span>
+                                        <span class="tooltiptext">Se houver pontos VoIP, eles serão considerados pontos telecom. Ademais, eles serão contabiizados juntamente com os pontos telcom (se houver)</span>
+                                    </span>
+                                </label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="voip" value="sim" onclick="toggleFields('voip', true)"> Sim</label>
+                                    <label><input type="radio" name="voip" value="nao" onclick="toggleFields('voip', false)"> Não</label>
+                                </div>
+                            </article>
+                        </div>
+                    
+                        <div id="voipFields" class="hidden-fields">
+                            <label for="numVoip">Número de pontos para VoIP por andar:</label>
+                            <input type="number" id="numVoip" name="numVoip">
+                        </div>
+                    
+                        <div class="options-container">
+                            <article class="options-article">
+                                <label class="options-label">
+                                    Há um sistema de CFTV?
+                                    <span class="tooltip">
+                                        <span class="tooltip-icon">i</span> 
+                                        <span class="tooltiptext">Os pontos de CFTV serão considerados pontos de rede e de forma independente deles, se houver</span>
+                                    </span>
+                                </label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="cftv" value="sim" onclick="toggleFields('cftv', true)"> Sim</label>
+                                    <label><input type="radio" name="cftv" value="nao" onclick="toggleFields('cftv', false)"> Não</label>
+                                </div>
+                            </article>
+                        </div>
+                    
+                        <div id="cftvFields" class="hidden-fields">
+                            <label for="numCftv">Número de pontos para CFTV por andar:</label>
+                            <input type="number" id="numCftv" name="numCftv">
+                        </div>
+                        <div class="options-container">
+                            <article class="options-article">
+                                <label class="options-label">Tipo de rack para Malha Horizontal</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="tipoRackMH" value="Aberto"> Aberto</label>
+                                    <label><input type="radio" name="tipoRackMH" value="Fechado"> Fechado</label>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="resultado">
+                <h2>Planilha Resultado</h2>
+                <div class="form-controls">
+                    <button type="button" onclick="calcular()">Calcular</button>
+                    <button type="button" id="novaPlanilha" style="display:none;" onclick="novaPlanilha()">Nova Planilha</button>
+                </div>
+                <div id="resultadoBackbone"></div>
+                <div id="resultadoMH"></div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2024 Calculadora de Infraestrutura</p>
+            </div>
+        </footer>
+
+        <script src="script.js"></script>
+    </body>
+</html>
