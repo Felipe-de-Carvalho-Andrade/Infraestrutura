@@ -1,26 +1,25 @@
-// Captura dos valores condicionais - Malha Horizontal
-const pontosTelecomSim = document.querySelector('input[name="pontosTelecom"]:checked')?.value === 'sim';
-const numPontosTelecom = pontosTelecomSim ? parseInt(document.getElementById('numPontosTelecom').value) || 0 : 0;
-const pontosRedeSim = document.querySelector('input[name="pontosRede"]:checked')?.value === 'sim';
-const numPontosRede = pontosRedeSim ? parseInt(document.getElementById('numPontosRede').value) || 0 : 0;
-const voipSim = document.querySelector('input[name="voip"]:checked')?.value === 'sim';
-const numVoip = voipSim ? parseInt(document.getElementById('numVoip').value) || 0 : 0;
-const cftvSim = document.querySelector('input[name="cftv"]:checked')?.value === 'sim';
-const numCftv = cftvSim ? parseInt(document.getElementById('numCftv').value) || 0 : 0;
-const tipoRackMH = document.querySelector('input[name="tipoRackMH"]:checked')?.value || false;
-
-// Captura dos valores condicionais - Backbone
-const backbonePrimarioSim = document.querySelector('input[name="BackbonePrimario"]:checked')?.value === 'sim';
-const numBackbonePrimario = backbonePrimarioSim ? parseInt(document.getElementById('numBackbonePrimario').value) || 0 : 0;
-const backboneSecundarioSim = document.querySelector('input[name="BackboneSecundario"]:checked')?.value === 'sim';
-const numBackboneSecundario = backboneSecundarioSim ? parseInt(document.getElementById('numBackboneSecundario').value) || 0 : 0;
-const tipoRackBB = document.querySelector('input[name="tipoRackBB"]:checked')?.value || false;
-
 // Função para coletar valores e gerar as planilhas
 function calcular() {
     if (!validarRespostas()) {
         return;
     }
+
+    // Captura dos valores condicionais - Malha Horizontal
+    const pontosTelecomSim = document.querySelector('input[name="pontosTelecom"]:checked')?.value === 'sim';
+    const numPontosTelecom = pontosTelecomSim ? parseInt(document.getElementById('numPontosTelecom').value) || 0 : 0;
+    const pontosRedeSim = document.querySelector('input[name="pontosRede"]:checked')?.value === 'sim';
+    const numPontosRede = pontosRedeSim ? parseInt(document.getElementById('numPontosRede').value) || 0 : 0;
+    const voipSim = document.querySelector('input[name="voip"]:checked')?.value === 'sim';
+    const numVoip = voipSim ? parseInt(document.getElementById('numVoip').value) || 0 : 0;
+    const cftvSim = document.querySelector('input[name="cftv"]:checked')?.value === 'sim';
+    const numCftv = cftvSim ? parseInt(document.getElementById('numCftv').value) || 0 : 0;
+    
+    // Captura dos valores condicionais - Backbone
+    const backbonePrimarioSim = document.querySelector('input[name="BackbonePrimario"]:checked')?.value === 'sim';
+    const numBackbonePrimario = backbonePrimarioSim ? parseInt(document.getElementById('numBackbonePrimario').value) || 0 : 0;
+    const backboneSecundarioSim = document.querySelector('input[name="BackboneSecundario"]:checked')?.value === 'sim';
+    const numBackboneSecundario = backboneSecundarioSim ? parseInt(document.getElementById('numBackboneSecundario').value) || 0 : 0;
+
 
     // Valores do Backbone
     const numPavimentosBackbone = parseInt(document.getElementById('numPavimentosBackbone').value) || 0;
@@ -36,6 +35,7 @@ function calcular() {
     const especificacaoCategoria = document.getElementById('especificacaoCategoria').value || '6';
     const voip = document.querySelector('input[name="voip"]:checked')?.value;
     const cftv = document.querySelector('input[name="cftv"]:checked')?.value;
+    const tipoRack = document.querySelector('input[name="tipoRack"]:checked')?.value || "Fechado";
 
         // ÁREA DE TRABALHO
         const qtdTotalTomadas = (((numPontosTelecom * 2) + numCftv + numPontosRede) * numPavimentosMH); // == Soma de todos Patch Cords
@@ -57,7 +57,7 @@ function calcular() {
     let planilhaBackbone = '';
     
     // Geração da planilha de Malha Horizontal
-    if ((numPavimentosMH > 0 && medidaMH > 0 && tipoRackMH) && (pontosTelecomSim || pontosRedeSim)) {
+    if (numPavimentosMH > 0 && (pontosTelecomSim || pontosRedeSim)) {
         const tamanhoRack = (qtdPPMH * 2) + (qtdPPMH * 2);
 
         planilhaMH += `<h3>Planilha de Malha Horizontal</h3>`;
