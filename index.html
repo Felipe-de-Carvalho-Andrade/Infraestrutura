@@ -31,24 +31,8 @@
                             <input type="number" id="numPavimentosBackbone">
                         </article>
                         <article>
-                            <label for="paresFibras">Número de pares de fibras:</label>
+                            <label for="paresFibras">Número de fibras:</label>
                             <input type="number" id="paresFibras">
-                        </article>
-                        <article>
-                            <label for="medidaCabo">Distância média (m):</label>
-                            <input type="number" id="medidaBB" step="0.01">
-                        </article>
-                        <article>
-                            <label for="especificacaoCabo">Especificação do cabo:</label>
-                            <input type="text" id="especificacaoCabo">
-                        </article>
-                        <article>
-                            <label for="caracteristicaFibra">Característica da fibra:</label>
-                            <input type="text" id="caracteristicaFibra">
-                        </article>
-                        <article>
-                            <label for="quantidadeBackbones">Backbones por andar:</label>
-                            <input type="number" id="quantidadeBackbones">
                         </article>
                         <div class="options-container">
                             <article class="options-article">
@@ -60,10 +44,19 @@
                             </article>
                         </div>
                         <div id="backbonePrimarioFields" class="hidden-fields">
-                            <label for="numBackbonePrimario">Distância entre os edifícios (m):</label>
-                            <input type="number" id="numBackbonePrimario" name="numBackbonePrimario">
+                            <label for="distanciaEdificios">Distância entre os edifícios (m):</label>
+                            <input type="number" id="distanciaEdificios" name="distanciaEdificios">
+                            <div class="form-group">
+                                <label for="tipoFibraPrimario">Tipo de Fibra (Backbone Primário):</label>
+                                <select id="tipoFibraPrimario" class="form-control">
+                                    <option value="SM">Monomodo (SM)</option>
+                                    <option value="MM">Multimodo (MM)</option>
+                                </select>
+                            </div>
+                            <label for="velocidadeTransmissaoPrimario">Velocidade mínima de transmissão em Gbps:</label>
+                            <input type="number" id="velocidadeTransmissaoPrimario" name="velocidadeTransmissaoPrimario">
                         </div>
-                    
+        
                         <div class="options-container">
                             <article class="options-article">
                                 <label class="options-label">Há Backbone secundário?</label>
@@ -74,15 +67,24 @@
                             </article>
                         </div>
                         <div id="backboneSecundarioFields" class="hidden-fields">
-                            <label for="numBackboneSecundario">
+                            <label for="alturaAndares">
                                 Altura dos andares (m):
                                 <span class="tooltip">
                                     <span class="tooltip-icon">i</span> 
                                     <span class="tooltiptext">Esse campo é referente ao pé-direito</span>
                                 </span>
                             </label>
-                            <input type="number" id="numBackboneSecundario" name="numBackboneSecundario">
-                        </div>               
+                            <input type="number" id="alturaAndares" name="alturaAndares">
+                            <div class="form-group">
+                                <label for="tipoFibraSecundario">Tipo de Fibra (Backbone Secundário):</label>
+                                <select id="tipoFibraSecundario" class="form-control">
+                                    <option value="SM">Monomodo (SM)</option>
+                                    <option value="MM">Multimodo (MM)</option>
+                                </select>
+                            </div>
+                            <label for="velocidadeTransmissaoSecundario">Velocidade mínima de transmissão em Gbps:</label>
+                            <input type="number" id="velocidadeTransmissaoSecundario" name="velocidadeTransmissaoSecundario">
+                        </div>         
                     </div>
                     
                     <div class="form-box" id="malha-horizontal">
@@ -173,7 +175,14 @@
                         </div>
                         <div class="options-container">
                             <article class="options-article">
-                                <label class="options-label">Tipo de rack</label>
+                                <label class="options-label">
+                                    Tipo de rack
+                                    <span class="tooltip">
+                                        <span class="tooltip-icon">i</span>
+                                        <span class="tooltiptext">Colocamos como tamanho do Rack o valor total mínimo de tamanho para que atenda a margem de segurança. 
+                                                A divisão de tamanhos ficará a cargo do cliente</span>
+                                    </span>
+                                </label>
                                 <div class="radio-group">
                                     <label><input type="radio" name="tipoRack" value="Aberto"> Aberto</label>
                                     <label><input type="radio" name="tipoRack" value="Fechado"> Fechado</label>

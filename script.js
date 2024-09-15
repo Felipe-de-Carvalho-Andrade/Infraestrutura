@@ -16,17 +16,24 @@ function calcular() {
     
     // Captura dos valores condicionais - Backbone
     const backbonePrimarioSim = document.querySelector('input[name="BackbonePrimario"]:checked')?.value === 'sim';
-    const numBackbonePrimario = backbonePrimarioSim ? parseInt(document.getElementById('numBackbonePrimario').value) || 0 : 0;
+    const distanciaEdificios = parseFloat(document.getElementById('distanciaEdificios').value) || 0;
+    const tipoFibraPrimario = document.getElementById('tipoFibraPrimario').value || '0';
+    const velocidadeTransmissaoPrimario = parseFloat(document.getElementById('velocidadeTransmissaoPrimario').value) || 0;
+
     const backboneSecundarioSim = document.querySelector('input[name="BackboneSecundario"]:checked')?.value === 'sim';
-    const numBackboneSecundario = backboneSecundarioSim ? parseInt(document.getElementById('numBackboneSecundario').value) || 0 : 0;
+    const alturaAndares = parseFloat(document.getElementById('alturaAndares').value) || 0;
+    const tipoFibraSecundario = document.getElementById('tipoFibraSecundario').value || '0';
+    const velocidadeTransmissaoSecundario = parseFloat(document.getElementById('velocidadeTransmissaoSecundario').value) || 0;
+
 
     // Valores do Backbone
     const numPavimentosBackbone = parseInt(document.getElementById('numPavimentosBackbone').value) || 0;
-    const paresFibras = parseInt(document.getElementById('paresFibras').value) || 0;
-    const medidaBB = parseFloat(document.getElementById('medidaBB').value) || 0;
-    const especificacaoCabo = document.getElementById('especificacaoCabo').value;
-    const caracteristicaFibra = document.getElementById('caracteristicaFibra').value;
-    const qtdBackbones = parseInt(document.getElementById('quantidadeBackbones').value) || 0;
+    const fibras = parseInt(document.getElementById('paresFibras').value) || 0;
+    const padraoTransmissaoPrimario = determinarPadraoTransmissao(tipoFibraPrimario, velocidadeTransmissaoPrimario, distanciaEdificios);
+    const padraoTransmissaoSecundario = determinarPadraoTransmissao(tipoFibraSecundario, velocidadeTransmissaoSecundario, alturaAndares);
+    const qtdDIO = Math.ceil(fibras*2 / 24);
+    const infoRackBB = calcularRackBB(qtdDIO, fibras, numPavimentosBackbone);
+
     
     // Valores da Malha Horizontal
     const numPavimentosMH = parseInt(document.getElementById('numPavimentosMH').value) || 0;
@@ -51,16 +58,13 @@ function calcular() {
         const qtdPatchCableAmarelo = (voip === 'sim') ? numPavimentosMH * numVoip : 0;
         const qtdPatchCableVermelho = (cftv === 'sim') ? numPavimentosMH * numCftv : 0;
         const qtdNVR = Math.ceil(qtdPatchCableVermelho / 24);
+        const infoRack = calcularRack(qtdPPMH, numPavimentosMH);
 
-        // MISCELÂNEA
-
- 
     let planilhaMH = '';
     let planilhaBackbone = '';
     
     // Geração da planilha de Malha Horizontal
     if (numPavimentosMH > 0 && (pontosTelecomSim || pontosRedeSim)) {
-        const infoRack = calcularRack(qtdPPMH, numPavimentosMH);
 
         planilhaMH += `<h3>Planilha de Malha Horizontal</h3>`;
         planilhaMH += `<table>
@@ -72,23 +76,23 @@ function calcular() {
                 <tr><td>Área de Trabalho</td><td>Cordão de ligação (Patch Cord), (categoria ${especificacaoCategoria}), (Tamanho 3 m), (cor: azul)</td><td>Unid.</td><td>${qtdPatchCableAzul + qtdPatchCableAmarelo}</td></tr>
                 ${qtdPatchCableVermelho > 0 ? `<tr><td>Área de Trabalho</td><td>Cordão de ligação (Patch Cord), (categoria ${especificacaoCategoria}), (Tamanho 3 m), (cor: [cor do teto])</td><td>Unid.</td><td>${qtdPatchCableVermelho}</td></tr>` : ''}
                 ${numPontosTelecom > 0 ? `<tr><td>Área de Trabalho</td><td>Espelho de conexão (Tamanho 4x4)</td><td>Unid.</td><td>${numPontosTelecom * numPavimentosMH}</td></tr>` : ``}
-                ${numPontosRede + numCftv + numVoip > 0 ? `<tr><td>Área de Trabalho</td><td>Espelho de conexão (Tamanho 2x4)</td><td>Unid.</td><td>${(numPontosRede + numCftv) * numPavimentosMH}</td></tr>` : ``}
+                ${numPontosRede + numCftv > 0 ? `<tr><td>Área de Trabalho</td><td>Espelho de conexão (Tamanho 2x4)</td><td>Unid.</td><td>${(numPontosRede + numCftv) * numPavimentosMH}</td></tr>` : ``}
                 <tr><td>Cabeamento Horizontal</td><td>Cabo UTP rígido (categoria ${especificacaoCategoria}) (azul)</td><td>Cx´s</td><td>${Math.ceil((qtdTotalTomadas * medidaMH) / 305)}</td></tr>
                 <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Patch Panel de Malha Horizontal, (Categoria ${especificacaoCategoria}), (24 portas), (Altura: 1U)</td><td>Unid.</td><td>${qtdPPMH}</td></tr>
                 <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Cordão de Ligação, flexível, (Patch Cable), (categoria ${especificacaoCategoria}), (Tamanho: 2m), (cor: azul)</td><td>Unid.</td><td>${qtdPatchCableAzul}</td></tr>
                 ${qtdPatchCableAmarelo > 0 ? `<tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Cordão de Ligação, flexível, (Patch Cable), (categoria ${especificacaoCategoria}), (Tamanho: 2m), (cor: amarelo)</td><td>Unid.</td><td>${qtdPatchCableAmarelo}</td></tr>` : ''}
                 ${qtdPatchCableVermelho > 0 ? `<tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Cordão de Ligação, flexível, (Patch Cable), (categoria ${especificacaoCategoria}), (Tamanho: 2m), (cor: vermelho)</td><td>Unid.</td><td>${qtdPatchCableVermelho}</td></tr>` : ''}
-                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Rack (${tipoRack}), (Tamanho total: = ${infoRack.tamanhoRack}U)</td><td>Unid.</td><td>${infoRack.quantidadeRacks}</td></tr>
-                ${tipoRack === 'Aberto' ? `<tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Organizador lateral para Rack ${infoRack.tamanhoRack}U</td><td>Unid.</td><td>${infoRack.quantidadeRacks * 2}</td></tr>` : ``}
-                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Bandeja fixa - 19" de largura (1U de bandeja + 3U de espaço)</td><td>Unid.</td><td>${infoRack.quantidadeRacks}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Rack (${tipoRack}), (Tamanho total: = ${infoRack.tamanhoRack}U)</td><td>Unid.</td><td>${infoRack.quantidadeRacks * numPavimentosMH}</td></tr>
+                ${tipoRack === 'Aberto' ? `<tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Organizador lateral para Rack ${infoRack.tamanhoRack}U</td><td>Unid.</td><td>${infoRack.quantidadeRacks * numPavimentosMH * 2}</td></tr>` : ``}
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Bandeja fixa - 19" de largura (1U de bandeja + 3U de espaço)</td><td>Unid.</td><td>${infoRack.quantidadeRacks * numPavimentosMH}</td></tr>
                 ${cftvSim ? `<tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Bandeja deslizante - 19" de largura</td><td>Unid.</td><td>${qtdNVR}</td></tr>` : ``}
-                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>${infoRack.tamanhoRack * 4}</td></tr>
-                <tr><td>Miscelânea</td><td>Abraçadeira de velcro</td><td>m</td><td>${infoRack.quantidadeRacks * 3}</td></tr>
-                <tr><td>Miscelânea</td><td>Abraçadeira Hellermann (conjunto com 100 unidades)</td><td>Conj.</td><td>${infoRack.quantidadeRacks}</td></tr>
-                <tr><td>Miscelânea</td><td>Filtro de linha com 08 tomadas</td><td>Unid.</td><td>${infoRack.quantidadeRacks * 2}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>${Math.ceil(infoRack.tamanhoRack * 4/10) * numPavimentosMH}</td></tr>
+                <tr><td>Miscelânea</td><td>Abraçadeira de velcro</td><td>m</td><td>${infoRack.quantidadeRacks * numPavimentosMH * 3}</td></tr>
+                <tr><td>Miscelânea</td><td>Abraçadeira Hellermann (conjunto com 100 unidades)</td><td>Conj.</td><td>${infoRack.quantidadeRacks * numPavimentosMH}</td></tr>
+                <tr><td>Miscelânea</td><td>Filtro de linha com 08 tomadas</td><td>Unid.</td><td>${infoRack.quantidadeRacks * numPavimentosMH * 2}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiquetas para identificação de tomadas e espelho</td><td>Unid.</td><td>${qtdEtqIdentificacaoTE}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiqueta identificação do cabo de malha horizontal</td><td>Unid.</td><td>${qtdEtqIdentificacaoMH}</td></tr>
-                <tr><td>Miscelânea</td><td>Etiquetas para Rack</td><td>Unid.</td><td>${infoRack.quantidadeRacks}</td></tr>
+                <tr><td>Miscelânea</td><td>Etiquetas para Rack</td><td>Unid.</td><td>${infoRack.quantidadeRacks * numPavimentosMH}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiquetas para Painel de Telecomunicações</td><td>Unid.</td><td>${qtdPPMH}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiquetas para identificação de portas do Patch Panel</td><td>Unid.</td><td>${qtdPPMH * 24}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiquetas para identificação dos Patch Cables</td><td>Unid.</td><td>${(qtdPatchCableAmarelo + qtdPatchCableAzul + qtdPatchCableVermelho) * 2}</td></tr>
@@ -104,25 +108,34 @@ function calcular() {
                 <tr><th>Tipo de Equip.</th><th>Descrição</th><th>Unidade</th><th>Qtd. Total</th></tr>
             </thead>
             <tbody>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Distribuidor óptico (DIO) - chassi com 19" de largura e 1U de altura com 24 portas</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Caixa de emenda (${paresFibras} fibras)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeija de emenda (${paresFibras} fibras)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Protetores de emenda</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>PigTail (especificação da fibra, núcleo e casca), (tipo de conector), (2m), (cor)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Acoplador óptico (especificação da fibra, núcleo e casca), (tipo de conector), (cor)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cordão óptico (especificação da fibra, núcleo e casca), (duplo), (tipo de conector), (2m), (cor)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Terminador Óptico (2, 4, 6 ou 8 fibras)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (MM ou SM), (núcleo e casca), (Loose ou Tight Buffer), (${paresFibras} fibras)</td><td>m</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Rack (Aberto), Tamanho: XXU)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeja fixa - 19" de largura</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeja deslizante - 19" de largura</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>1</td></tr>
-                <tr><td>Miscelânea</td><td>Abraçadeira de velcro</td><td>m</td><td>1</td></tr>
-                <tr><td>Miscelânea</td><td>Abraçadeira Hellermann (conjunto com 100 unidades)</td><td>Conj.</td><td>1</td></tr>
-                <tr><td>Miscelânea</td><td>Filtro de linha com 08 tomadas</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Miscelânea</td><td>Etiquetas para Rack</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Miscelânea</td><td>Etiquetas para DIO</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Miscelânea</td><td>Etiquetas para identificação dos cordões ópticos e Pigtails externos</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Distribuidor óptico (DIO) - chassi com 19" de largura e 1U de altura com 24 portas</td><td>Unid.</td><td>${qtdDIO}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Caixa de emenda (${fibras} fibras)</td><td>Unid.</td><td>${qtdDIO * 2}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeija de emenda (${fibras} fibras)</td><td>Unid.</td><td>${qtdDIO * 4}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Protetores de emenda</td><td>Unid.</td><td>${numPavimentosBackbone * fibras}</td></tr>
+                ${backbonePrimarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Primário</td><td>PigTail (${padraoTransmissaoPrimario.padraoTransmissao}), (${padraoTransmissaoPrimario.nucleo}x125µm), (simples), (LC), (2m), (cor)</td><td>Unid.</td><td>${fibras}</td></tr>` : ``}
+                ${backbonePrimarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Primário</td><td>Acoplador óptico (${padraoTransmissaoPrimario.padraoTransmissao}), (${padraoTransmissaoPrimario.nucleo}x125µm), (duplo), (LC), (cor)</td><td>Unid.</td><td>${fibras/2}</td></tr>` : ``}
+                ${backbonePrimarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Primário</td><td>Cordão óptico (${padraoTransmissaoPrimario.padraoTransmissao}), (${padraoTransmissaoPrimario.nucleo}x125µm), (duplo), (LC), (2m), (cor)</td><td>Unid.</td><td>${fibras/2}</td></tr>` : ``}
+                ${backboneSecundarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Secundario</td><td>PigTail (${padraoTransmissaoSecundario.padraoTransmissao}), (${padraoTransmissaoSecundario.nucleo}x125µm), (simples), (LC), (2m), (cor)</td><td>Unid.</td><td>${numPavimentosBackbone * fibras}</td></tr>` : ``}
+                ${backboneSecundarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Secundario</td><td>Acoplador óptico (${padraoTransmissaoSecundario.padraoTransmissao}), (${padraoTransmissaoSecundario.nucleo}x125µm), (simples), (LC), (2m), (cor)</td><td>Unid.</td><td>${numPavimentosBackbone * fibras/2}</td></tr>` : ``}
+                ${backboneSecundarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Secundario</td><td>Cordão óptico (${padraoTransmissaoSecundario.padraoTransmissao}), (${padraoTransmissaoSecundario.nucleo}x125µm), (simples), (LC), (2m), (cor)</td><td>Unid.</td><td>${numPavimentosBackbone * fibras/2}</td></tr>` : ``}
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Terminador Óptico (8 fibras)</td><td>Unid.</td><td>${Math.ceil(fibras / 8) * numPavimentosBackbone}</td></tr>
+                ${tipoFibraPrimario === 'MM' ? `<tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (MM), (${padraoTransmissaoPrimario.nucleo}x125µm), (Loose), (${fibras} fibras)</td><td>m</td><td>${Math.ceil(distanciaEdificios * 1.1)}</td></tr>`: ``}
+                ${tipoFibraPrimario === 'SM' ? `<tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (SM), (${padraoTransmissaoPrimario.nucleo}x125µm), (Loose), (${fibras} fibras)</td><td>m</td><td>${Math.ceil(distanciaEdificios * 1.1)}</td></tr>`: ``}
+                ${tipoFibraSecundario === 'MM' ? `<tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (MM), (${padraoTransmissaoSecundario.nucleo}x125µm), (Tight Buffer), (${fibras} fibras)</td><td>m</td><td>${Math.ceil((alturaAndares * numPavimentosBackbone)* 1.1)}</td></tr>`: ``}
+                ${tipoFibraSecundario === 'SM' ? `<tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (SM), (${padraoTransmissaoSecundario.nucleo}x125µm), (Tight Buffer), (${fibras} fibras)</td><td>m</td><td>${Math.ceil((alturaAndares * numPavimentosBackbone)* 1.1)}</td></tr>`: ``}
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Rack (Aberto), (Tamanho: ${infoRackBB.tamanhoRack}U)</td><td>Unid.</td><td>${infoRackBB.quantidadeRacks * numPavimentosBackbone}</td></tr>
+                tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Organizador lateral para Rack ${infoRackBB.tamanhoRack}U</td><td>Unid.</td><td>${infoRack.quantidadeRacks * 2 * numPavimentosBackbone}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeja fixa - 19" de largura (1U de bandeja + 3U de espaço)</td><td>Unid.</td><td>${infoRackBB.quantidadeRacks * numPavimentosBackbone}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>${Math.ceil(infoRackBB.tamanhoRack * 4 / 10) * numPavimentosBackbone}</td></tr>
+                <tr><td>Miscelânea</td><td>Abraçadeira de velcro</td><td>m</td><td>${infoRackBB.quantidadeRacks * 3 * numPavimentosBackbone}</td></tr>
+                <tr><td>Miscelânea</td><td>Abraçadeira Hellermann (conjunto com 100 unidades)</td><td>Conj.</td><td>${infoRackBB.quantidadeRacks * numPavimentosBackbone}</td></tr>
+                <tr><td>Miscelânea</td><td>Filtro de linha com 08 tomadas</td><td>Unid.</td><td>${infoRackBB.quantidadeRacks * 2 * numPavimentosBackbone}</td></tr>
+                <tr><td>Miscelânea</td><td>Etiquetas para Rack</td><td>Unid.</td><td>${infoRackBB.quantidadeRacks * numPavimentosBackbone}</td></tr>
+                <tr><td>Miscelânea</td><td>Etiquetas para DIO</td><td>Unid.</td><td>${qtdDIO}</td></tr>
+                ${backbonePrimarioSim && backboneSecundarioSim ? ` <tr><td>Miscelânea</td><td>Etiquetas para identificação dos cordões ópticos e Pigtails externos</td><td>Unid.</td><td>${(fibras + fibras/2) + (numPavimentosBackbone * fibras + numPavimentosBackbone * fibras/2)}</td></tr>` : ``}
+                ${backbonePrimarioSim && backboneSecundarioSim == 'nao' ? ` <tr><td>Miscelânea</td><td>Etiquetas para identificação dos cordões ópticos e Pigtails externos</td><td>Unid.</td><td>${fibras + fibras/2}</td></tr>` : ``}
+                ${backbonePrimarioSim == 'nao' && backboneSecundarioSim ? ` <tr><td>Miscelânea</td><td>Etiquetas para identificação dos cordões ópticos e Pigtails externos</td><td>Unid.</td><td>${numPavimentosBackbone * fibras + numPavimentosBackbone * fibras/2}</td></tr>` : ``}
+               
             </tbody>
         </table>`;
     }
@@ -145,6 +158,8 @@ function validarRespostas() {
     const backboneSecundario = document.querySelector('input[name="BackboneSecundario"]:checked');
     const pontosTelecom = document.querySelector('input[name="pontosTelecom"]:checked');
     const pontosRede = document.querySelector('input[name="pontosRede"]:checked');
+    const velocidadeTransmissaoPrimario = parseFloat(document.getElementById('velocidadeTransmissaoPrimario').value) || 0;
+    const velocidadeTransmissaoSecundario = parseFloat(document.getElementById('velocidadeTransmissaoSecundario').value) || 0;
 
     // Verificar se todas as perguntas obrigatórias foram respondidas
     if (!backbonePrimario) {
@@ -163,6 +178,7 @@ function validarRespostas() {
         alert("Por favor, responda se há pontos de rede.");
         return false;
     }
+    
 
     // Verificar se pelo menos uma das perguntas relacionadas ao Backbone, pontos de telecom ou pontos de rede é "Sim"
     const backbonePrimarioSim = backbonePrimario.value === 'sim';
@@ -214,7 +230,7 @@ function novaPlanilha() {
     document.getElementById('novaPlanilha').style.display = 'none';
 }
 
-// Função para calcular tamanho do Rack e quantidade de Racks
+// Função para calcular tamanho do Rack e quantidade de Racks de malha horizontal
 function calcularRack(qtdPPMH, numPavimentos) {
     qtdPPMH /= numPavimentos;
     
@@ -248,6 +264,111 @@ function calcularRack(qtdPPMH, numPavimentos) {
     return {
         tamanhoRack: tamanhoRack,
         quantidadeRacks: quantidadeRacks
+    };
+}
+
+// Função para calcular tamanho do Rack e quantidade de Racks de backbone
+function calcularRackBB(qtdDIO) {
+    // Calcula o tamanho do rack
+    const tamanhoRack = ((qtdDIO * 2) * 2 + 4) * 1.5;
+
+    // Define os limites e incrementos para o tamanho do rack
+    const tamanhoMinimo = 6;
+    const tamanhoMaximo = 48;
+    const incrementoMenor = 2;
+    const incrementoMaior = 4;
+
+    let tamanhoRackValido;
+    let quantidadeRacks = 1;
+
+    if (tamanhoRack > tamanhoMaximo) {
+        // Se o tamanho exceder o máximo permitido, divida em múltiplos racks
+        quantidadeRacks = Math.ceil(tamanhoRack / tamanhoMaximo);
+        tamanhoRackValido = tamanhoMaximo;
+    } else {
+        // Determina o tamanho válido para racks
+        if (tamanhoRack <= 12) {
+            tamanhoRackValido = Math.max(tamanhoMinimo, Math.ceil(tamanhoRack / incrementoMenor) * incrementoMenor);
+        } else {
+            tamanhoRackValido = Math.max(12, Math.ceil((tamanhoRack - 12) / incrementoMaior) * incrementoMaior + 12);
+        }
+        
+        quantidadeRacks = 1;
+    }
+
+    return {
+        tamanhoRack: tamanhoRack,
+        quantidadeRacks: quantidadeRacks
+    };
+}
+
+// Função para determinar as epecificações da fibra
+function determinarPadraoTransmissao(tipoFibra, velocidadeTransmissao, distancia) {
+    let padraoTransmissao = "Não aplicável";
+    let nucleo = "Não aplicável";
+
+    // 1000Base-SX
+    if (velocidadeTransmissao <= 1 && tipoFibra == 'MM') {
+        if (distancia <= 260) {
+            padraoTransmissao = 'Fibra MM 1000Base-SX';
+            nucleo = '62.5';
+        } else if (distancia <= 550) {
+            padraoTransmissao = 'Fibra MM 1000Base-SX';
+            nucleo = '50';
+        }
+    }
+
+    // 1000Base-LX
+    else if (velocidadeTransmissao <= 1 && tipoFibra == 'MM') {
+        if (distancia <= 440) {
+            padraoTransmissao = 'Fibra MM 1000Base-LX';
+            nucleo = '62.5';
+        } else if (distancia <= 750) {
+            padraoTransmissao = 'Fibra MM 1000Base-LX';
+            nucleo = ' 50';
+        }
+    } else if (velocidadeTransmissao <= 1 && tipoFibra == 'SM') {
+        if (distancia <= 3000) {
+            padraoTransmissao = 'Fibra SM 1000Base-LX';
+            nucleo ='9';
+        }
+    }
+
+    // 10GBase-SR
+    else if (velocidadeTransmissao <= 10 && tipoFibra == 'MM') {
+        if (distancia <= 300) {
+            padraoTransmissao = 'Fibra MM 10GBase-SR com janela de 850nm';
+            nucleo = '62.5';
+        }
+    }
+
+    // 10GBase-LR
+    else if (velocidadeTransmissao <= 10 && tipoFibra == 'SM') {
+        if (distancia <= 10000) {
+            padraoTransmissao = 'Fibra SM 10GBase-LR com janela de 1310nm';
+            nucleo ='9';
+        }
+    }
+
+    // 10GBase-X
+    else if (velocidadeTransmissao <= 10 && tipoFibra == 'SM') {
+        if (distancia <= 40000) {
+            padraoTransmissao = 'Fibra SM 10GBase-X com janela de 1550nm';
+            nucleo ='9';
+        }
+    }
+
+    // 10GBase-ER
+    else if ((velocidadeTransmissao <= 10 || velocidadeTransmissao >= 10) && tipoFibra == 'SM') {
+        if (distancia <= 40000) {
+            padraoTransmissao = 'Fibra SM 10GBase-ER com janela de 1550nm';
+            nucleo ='9';
+        }
+    }
+
+    return {
+        padraoTransmissao: padraoTransmissao,
+        nucleo: nucleo
     };
 }
 
