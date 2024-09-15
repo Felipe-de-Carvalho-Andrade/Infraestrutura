@@ -20,11 +20,10 @@ function calcular() {
     const backboneSecundarioSim = document.querySelector('input[name="BackboneSecundario"]:checked')?.value === 'sim';
     const numBackboneSecundario = backboneSecundarioSim ? parseInt(document.getElementById('numBackboneSecundario').value) || 0 : 0;
 
-
     // Valores do Backbone
     const numPavimentosBackbone = parseInt(document.getElementById('numPavimentosBackbone').value) || 0;
     const paresFibras = parseInt(document.getElementById('paresFibras').value) || 0;
-    const medidaCabo = parseFloat(document.getElementById('medidaCabo').value) || 0;
+    const medidaBB = parseFloat(document.getElementById('medidaBB').value) || 0;
     const especificacaoCabo = document.getElementById('especificacaoCabo').value;
     const caracteristicaFibra = document.getElementById('caracteristicaFibra').value;
     const qtdBackbones = parseInt(document.getElementById('quantidadeBackbones').value) || 0;
@@ -38,45 +37,35 @@ function calcular() {
     const tipoRack = document.querySelector('input[name="tipoRack"]:checked')?.value || "Fechado";
 
         // ÁREA DE TRABALHO
-        const qtdTotalTomadas = (((numPontosTelecom * 2) + numCftv + numPontosRede) * numPavimentosMH); // == Soma de todos Patch Cords
+        const qtdTotalTomadasAndar = ((numPontosTelecom * 2) + numCftv + numPontosRede);
+        const qtdTotalTomadas = (qtdTotalTomadasAndar * numPavimentosMH);
         const qtdEtqIdentificacaoTE = qtdTotalTomadas  + ((numPontosTelecom + numPontosRede + numCftv) * numPavimentosMH);
         
         // MALHA HORIZONTAL
-        const qtdEtqIdentificacaoMH = 2*qtdTotalTomadas; // Duas etiquetas, uma na entrada do cabo e outra na saída (lig. com tomanda // lig. com switch)
+        const qtdEtqIdentificacaoMH = qtdTotalTomadas * 2;
         
         // SALA DE EQUIPAMENTOS/TELECOM (SEQ/SET)
-        const qtdPPMH = Math.ceil(qtdTotalTomadas / 24);
+        const qtdPPMHAndar = Math.ceil(qtdTotalTomadasAndar / 24);
+        const qtdPPMH = qtdPPMHAndar * numPavimentosMH;
         const qtdPatchCableAzul = ((numPontosTelecom * 2) + numPontosRede - numVoip) * numPavimentosMH;
         const qtdPatchCableAmarelo = (voip === 'sim') ? numPavimentosMH * numVoip : 0;
         const qtdPatchCableVermelho = (cftv === 'sim') ? numPavimentosMH * numCftv : 0;
+        const qtdNVR = Math.ceil(qtdPatchCableVermelho / 24);
 
         // MISCELÂNEA
 
-
-        // RACK
-        let quantidadeRack = 1; // toda rede precisa de pelo menos um
-
-        // adicionar pergunta de rack por andar...
-        const tamanhoRack = [ (qtdPPMH * 2) + (qtdPPMH * 2) ] * 1.5; // Tamanho do rack 
-        
-        if (tamanhoRack > 36) {
-            quantidadeRack  = Math.ceil(tamanhoRack/36)            
-            // Quantidade to rack / tamanho maximo, arredondando para o minimo maior inteiro de quantidade de rack
-
-        } else return;
-    
  
     let planilhaMH = '';
     let planilhaBackbone = '';
     
     // Geração da planilha de Malha Horizontal
     if (numPavimentosMH > 0 && (pontosTelecomSim || pontosRedeSim)) {
-        
+        const infoRack = calcularRack(qtdPPMH, numPavimentosMH);
 
         planilhaMH += `<h3>Planilha de Malha Horizontal</h3>`;
         planilhaMH += `<table>
             <thead>
-                <tr><th>Local</th><th>Descrição</th><th>Unidade</th><th>Qtd. Total</th></tr>
+                <tr><th>Tipo de Equip.</th><th>Descrição</th><th>Unidade</th><th>Qtd. Total</th></tr>
             </thead>
             <tbody>
                 <tr><td>Área de Trabalho</td><td>Tomada RJ 45 Fêmea (categoria ${especificacaoCategoria})</td><td>Unid.</td><td>${qtdTotalTomadas}</td></tr>
@@ -85,21 +74,21 @@ function calcular() {
                 ${numPontosTelecom > 0 ? `<tr><td>Área de Trabalho</td><td>Espelho de conexão (Tamanho 4x4)</td><td>Unid.</td><td>${numPontosTelecom * numPavimentosMH}</td></tr>` : ``}
                 ${numPontosRede + numCftv + numVoip > 0 ? `<tr><td>Área de Trabalho</td><td>Espelho de conexão (Tamanho 2x4)</td><td>Unid.</td><td>${(numPontosRede + numCftv) * numPavimentosMH}</td></tr>` : ``}
                 <tr><td>Cabeamento Horizontal</td><td>Cabo UTP rígido (categoria ${especificacaoCategoria}) (azul)</td><td>Cx´s</td><td>${Math.ceil((qtdTotalTomadas * medidaMH) / 305)}</td></tr>
-                <tr><td>Sala de Equipamentos / Telecom (SEQ/SET)</td><td>Patch Panel de Malha Horizontal, (Categoria ${especificacaoCategoria}), (24 portas), (Altura: 1U)</td><td>Unid.</td><td>${qtdPPMH}</td></tr>
-                <tr><td>Sala de Equipamentos / Telecom (SEQ/SET)</td><td>Cordão de Ligação, flexível, (Patch Cable), (categoria ${especificacaoCategoria}), (Tamanho: 2m), (cor: azul)</td><td>Unid.</td><td>${qtdPatchCableAzul}</td></tr>
-                ${qtdPatchCableAmarelo > 0 ? `<tr><td>Sala de Equipamentos / Telecom (SEQ/SET)</td><td>Cordão de Ligação, flexível, (Patch Cable), (categoria ${especificacaoCategoria}), (Tamanho: 2m), (cor: amarelo)</td><td>Unid.</td><td>${qtdPatchCableAmarelo}</td></tr>` : ''}
-                ${qtdPatchCableVermelho > 0 ? `<tr><td>Sala de Equipamentos / Telecom (SEQ/SET)</td><td>Cordão de Ligação, flexível, (Patch Cable), (categoria ${especificacaoCategoria}), (Tamanho: 2m), (cor: vermelho)</td><td>Unid.</td><td>${qtdPatchCableVermelho}</td></tr>` : ''}
-                <tr><td>Sala de Equipamentos / Telecom (SEQ/SET)</td><td>Rack (${tipoRack}), (Tamanho: = ${tamanhoRack}U)</td><td>Unid.</td><td>${numPavimentosMH}</td></tr>
-                ${tipoRack === 'Aberto' ? `<tr><td>Sala de Equipamentos / Telecom (SEQ/SET)</td><td>Organizador lateral para Rack ${tamanhoRack}U</td><td>Unid.</td><td>${numPavimentosMH}</td></tr>` : ``}
-                <tr><td>Sala de Equipamentos / Telecom (SEQ/SET)</td><td>Bandeja fixa - 19" de largura</td><td>Unid.</td><td>${numPavimentosMH}</td></tr>
-                <tr><td>Sala de Equipamentos / Telecom (SEQ/SET)</td><td>Bandeja deslizante - 19" de largura</td><td>Unid.</td><td>${numPavimentosMH}</td></tr>
-                <tr><td>Sala de Equipamentos / Telecom (SEQ/SET)</td><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>${numPavimentosMH}</td></tr>
-                <tr><td>Miscelânea</td><td>Abraçadeira de velcro</td><td>m</td><td>${numPavimentosMH}</td></tr>
-                <tr><td>Miscelânea</td><td>Abraçadeira Hellermann (conjunto com 100 unidades)</td><td>Conj.</td><td>${numPavimentosMH}</td></tr>
-                <tr><td>Miscelânea</td><td>Filtro de linha com 08 tomadas</td><td>Unid.</td><td>${numPavimentosMH}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Patch Panel de Malha Horizontal, (Categoria ${especificacaoCategoria}), (24 portas), (Altura: 1U)</td><td>Unid.</td><td>${qtdPPMH}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Cordão de Ligação, flexível, (Patch Cable), (categoria ${especificacaoCategoria}), (Tamanho: 2m), (cor: azul)</td><td>Unid.</td><td>${qtdPatchCableAzul}</td></tr>
+                ${qtdPatchCableAmarelo > 0 ? `<tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Cordão de Ligação, flexível, (Patch Cable), (categoria ${especificacaoCategoria}), (Tamanho: 2m), (cor: amarelo)</td><td>Unid.</td><td>${qtdPatchCableAmarelo}</td></tr>` : ''}
+                ${qtdPatchCableVermelho > 0 ? `<tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Cordão de Ligação, flexível, (Patch Cable), (categoria ${especificacaoCategoria}), (Tamanho: 2m), (cor: vermelho)</td><td>Unid.</td><td>${qtdPatchCableVermelho}</td></tr>` : ''}
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Rack (${tipoRack}), (Tamanho total: = ${infoRack.tamanhoRack}U)</td><td>Unid.</td><td>${infoRack.quantidadeRacks}</td></tr>
+                ${tipoRack === 'Aberto' ? `<tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Organizador lateral para Rack ${infoRack.tamanhoRack}U</td><td>Unid.</td><td>${infoRack.quantidadeRacks * 2}</td></tr>` : ``}
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Bandeja fixa - 19" de largura (1U de bandeja + 3U de espaço)</td><td>Unid.</td><td>${infoRack.quantidadeRacks}</td></tr>
+                ${cftvSim ? `<tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Bandeja deslizante - 19" de largura</td><td>Unid.</td><td>${qtdNVR}</td></tr>` : ``}
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>${infoRack.tamanhoRack * 4}</td></tr>
+                <tr><td>Miscelânea</td><td>Abraçadeira de velcro</td><td>m</td><td>${infoRack.quantidadeRacks * 3}</td></tr>
+                <tr><td>Miscelânea</td><td>Abraçadeira Hellermann (conjunto com 100 unidades)</td><td>Conj.</td><td>${infoRack.quantidadeRacks}</td></tr>
+                <tr><td>Miscelânea</td><td>Filtro de linha com 08 tomadas</td><td>Unid.</td><td>${infoRack.quantidadeRacks * 2}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiquetas para identificação de tomadas e espelho</td><td>Unid.</td><td>${qtdEtqIdentificacaoTE}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiqueta identificação do cabo de malha horizontal</td><td>Unid.</td><td>${qtdEtqIdentificacaoMH}</td></tr>
-                <tr><td>Miscelânea</td><td>Etiquetas para Rack</td><td>Unid.</td><td>${numPavimentosMH}</td></tr>
+                <tr><td>Miscelânea</td><td>Etiquetas para Rack</td><td>Unid.</td><td>${infoRack.quantidadeRacks}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiquetas para Painel de Telecomunicações</td><td>Unid.</td><td>${qtdPPMH}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiquetas para identificação de portas do Patch Panel</td><td>Unid.</td><td>${qtdPPMH * 24}</td></tr>
                 <tr><td>Miscelânea</td><td>Etiquetas para identificação dos Patch Cables</td><td>Unid.</td><td>${(qtdPatchCableAmarelo + qtdPatchCableAzul + qtdPatchCableVermelho) * 2}</td></tr>
@@ -112,26 +101,28 @@ function calcular() {
         planilhaBackbone += `<h3>Planilha de Backbone</h3>`;
         planilhaBackbone += `<table>
             <thead>
-                <tr><th>Descrição</th><th>Unidade</th><th>Qtd. Total</th></tr>
+                <tr><th>Tipo de Equip.</th><th>Descrição</th><th>Unidade</th><th>Qtd. Total</th></tr>
             </thead>
             <tbody>
-                <tr><td>Distribuidor óptico (DIO) - chassi com 19" de largura e 1U de altura com (12, 16, 24 ou 48 portas)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Acessórios para Distribuidor Óptico (caixa de emenda, protetores de emenda, abraçadeiras plásticas)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>PigTail (especificação da fibra, núcleo e casca, tipo de conector, 2m, cor)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Acoplador óptico (especificação da fibra, núcleo e casca, tipo de conector, cor)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Cordão óptico (especificação da fibra, núcleo e casca, duplo, tipo de conector, 2m, cor)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Terminador Óptico (2, 4, 6 ou 8 fibras)</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Cabo Óptico (MM ou SM, núcleo e casca, Loose ou Tight Buffer, quantidade de fibras)</td><td>m</td><td>1</td></tr>
-                <tr><td>Rack (${tipoRack}, Tamanho: ${tamanhoRack}U)</td><td>Unid.</td><td>${quantidadeRack}</td></tr>
-                <tr><td>Bandeja fixa - 19" de largura</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Bandeja deslizante - 19" de largura</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>1</td></tr>
-                <tr><td>Abraçadeira de velcro</td><td>m</td><td>1</td></tr>
-                <tr><td>Abraçadeira Hellermann (conjunto com 100 unidades)</td><td>Conj.</td><td>1</td></tr>
-                <tr><td>Filtro de linha com 08 tomadas</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Etiquetas para Rack</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Etiquetas para DIO</td><td>Unid.</td><td>1</td></tr>
-                <tr><td>Etiquetas para identificação dos cordões ópticos e Pigtails externos</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Distribuidor óptico (DIO) - chassi com 19" de largura e 1U de altura com 24 portas</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Caixa de emenda (${paresFibras} fibras)</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeija de emenda (${paresFibras} fibras)</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Protetores de emenda</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>PigTail (especificação da fibra, núcleo e casca), (tipo de conector), (2m), (cor)</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Acoplador óptico (especificação da fibra, núcleo e casca), (tipo de conector), (cor)</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cordão óptico (especificação da fibra, núcleo e casca), (duplo), (tipo de conector), (2m), (cor)</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Terminador Óptico (2, 4, 6 ou 8 fibras)</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (MM ou SM), (núcleo e casca), (Loose ou Tight Buffer), (${paresFibras} fibras)</td><td>m</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Rack (Aberto), Tamanho: XXU)</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeja fixa - 19" de largura</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeja deslizante - 19" de largura</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>1</td></tr>
+                <tr><td>Miscelânea</td><td>Abraçadeira de velcro</td><td>m</td><td>1</td></tr>
+                <tr><td>Miscelânea</td><td>Abraçadeira Hellermann (conjunto com 100 unidades)</td><td>Conj.</td><td>1</td></tr>
+                <tr><td>Miscelânea</td><td>Filtro de linha com 08 tomadas</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Miscelânea</td><td>Etiquetas para Rack</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Miscelânea</td><td>Etiquetas para DIO</td><td>Unid.</td><td>1</td></tr>
+                <tr><td>Miscelânea</td><td>Etiquetas para identificação dos cordões ópticos e Pigtails externos</td><td>Unid.</td><td>1</td></tr>
             </tbody>
         </table>`;
     }
@@ -175,10 +166,11 @@ function validarRespostas() {
 
     // Verificar se pelo menos uma das perguntas relacionadas ao Backbone, pontos de telecom ou pontos de rede é "Sim"
     const backbonePrimarioSim = backbonePrimario.value === 'sim';
+    const backboneSecundarioSim = backboneSecundario.value === 'sim';
     const pontosTelecomSim = pontosTelecom.value === 'sim';
     const pontosRedeSim = pontosRede.value === 'sim';
 
-    if (!backbonePrimarioSim && !pontosTelecomSim && !pontosRedeSim) {
+    if (!backbonePrimarioSim && !backboneSecundarioSim && !pontosTelecomSim && !pontosRedeSim) {
         alert("Não foi possível realizar a quantificação!");
         return false;
     }
@@ -205,6 +197,7 @@ function toggleFields(fieldName, show) {
     }
 }
 
+// Função para gerar nova planilha
 function novaPlanilha() {
     // Limpar todos os campos de entrada
     document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => input.value = '');
@@ -219,6 +212,43 @@ function novaPlanilha() {
 
     // Atualizar visibilidade dos botões
     document.getElementById('novaPlanilha').style.display = 'none';
+}
+
+// Função para calcular tamanho do Rack e quantidade de Racks
+function calcularRack(qtdPPMH, numPavimentos) {
+    qtdPPMH /= numPavimentos;
+    
+    // Calcula o tamanho do rack
+    const tamanhoRack = ((qtdPPMH * 2) * 2 + 4) * 1.5;
+
+    // Define os limites e incrementos para o tamanho do rack
+    const tamanhoMinimo = 6;
+    const tamanhoMaximo = 48;
+    const incrementoMenor = 2;
+    const incrementoMaior = 4;
+
+    let tamanhoRackValido;
+    let quantidadeRacks = 1;
+
+    if (tamanhoRack > tamanhoMaximo) {
+        // Se o tamanho exceder o máximo permitido, divida em múltiplos racks
+        quantidadeRacks = Math.ceil(tamanhoRack / tamanhoMaximo);
+        tamanhoRackValido = tamanhoMaximo;
+    } else {
+        // Determina o tamanho válido para racks
+        if (tamanhoRack <= 12) {
+            tamanhoRackValido = Math.max(tamanhoMinimo, Math.ceil(tamanhoRack / incrementoMenor) * incrementoMenor);
+        } else {
+            tamanhoRackValido = Math.max(12, Math.ceil((tamanhoRack - 12) / incrementoMaior) * incrementoMaior + 12);
+        }
+        
+        quantidadeRacks = 1;
+    }
+
+    return {
+        tamanhoRack: tamanhoRack,
+        quantidadeRacks: quantidadeRacks
+    };
 }
 
 // Inicializar campos e botões ao carregar a página

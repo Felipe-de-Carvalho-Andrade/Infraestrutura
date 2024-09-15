@@ -5,10 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Calculadora de Infraestrutura</title>
         <link rel="stylesheet" href="styles.css">
+        <link rel="shortcut icon" href="cefet.png" type="image/x-icon">
     </head>
     <body>
         <header>
-            <img src="cefet.png" width=10%>
+            <img src="cefet.png" width="10%">
             <h1>Quantificação de Materiais - Infraestrutura de Rede</h1>
             <nav>
                 <ul>
@@ -35,7 +36,7 @@
                         </article>
                         <article>
                             <label for="medidaCabo">Distância média (m):</label>
-                            <input type="number" id="medidaCabo" step="0.01">
+                            <input type="number" id="medidaBB" step="0.01">
                         </article>
                         <article>
                             <label for="especificacaoCabo">Especificação do cabo:</label>
@@ -172,13 +173,7 @@
                         </div>
                         <div class="options-container">
                             <article class="options-article">
-                                <label class="options-label">Tipo de rack
-                                    <span class="tooltip">
-                                        <span class="tooltip-icon">i</span> 
-                                        <span class="tooltiptext">Dependendo do tamanho do rack, será sugerido uma divisão em duas ou mais unidades</span>
-                                    </span>
-
-                                </label>
+                                <label class="options-label">Tipo de rack</label>
                                 <div class="radio-group">
                                     <label><input type="radio" name="tipoRack" value="Aberto"> Aberto</label>
                                     <label><input type="radio" name="tipoRack" value="Fechado"> Fechado</label>
