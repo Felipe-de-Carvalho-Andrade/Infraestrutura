@@ -31,8 +31,10 @@ function calcular() {
     const fibras = parseInt(document.getElementById('paresFibras').value) || 0;
     const padraoTransmissaoPrimario = determinarPadraoTransmissao(tipoFibraPrimario, velocidadeTransmissaoPrimario, distanciaEdificios);
     const padraoTransmissaoSecundario = determinarPadraoTransmissao(tipoFibraSecundario, velocidadeTransmissaoSecundario, alturaAndares);
-    const qtdDIO = Math.ceil(fibras*2 / 24);
-    const infoRackBB = calcularRackBB(qtdDIO, fibras, numPavimentosBackbone);
+
+    const qtdDIO = Math.ceil(fibras * 2 / 24);
+    const qtdTO = Math.ceil(fibras / 8);
+    const infoRackBB = calcularRackBB(qtdDIO, qtdTO);
 
     
     // Valores da Malha Horizontal
@@ -58,14 +60,13 @@ function calcular() {
         const qtdPatchCableAmarelo = (voip === 'sim') ? numPavimentosMH * numVoip : 0;
         const qtdPatchCableVermelho = (cftv === 'sim') ? numPavimentosMH * numCftv : 0;
         const qtdNVR = Math.ceil(qtdPatchCableVermelho / 24);
-        const infoRack = calcularRack(qtdPPMH, numPavimentosMH);
+        const infoRack = calcularRack(qtdPPMHAndar);
 
     let planilhaMH = '';
     let planilhaBackbone = '';
     
     // Geração da planilha de Malha Horizontal
     if (numPavimentosMH > 0 && (pontosTelecomSim || pontosRedeSim)) {
-
         planilhaMH += `<h3>Planilha de Malha Horizontal</h3>`;
         planilhaMH += `<table>
             <thead>
@@ -109,8 +110,8 @@ function calcular() {
             </thead>
             <tbody>
                 <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Distribuidor óptico (DIO) - chassi com 19" de largura e 1U de altura com 24 portas</td><td>Unid.</td><td>${qtdDIO}</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Caixa de emenda (${fibras} fibras)</td><td>Unid.</td><td>${qtdDIO * 2}</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeija de emenda (${fibras} fibras)</td><td>Unid.</td><td>${qtdDIO * 4}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Caixa de emenda (12 fibras)</td><td>Unid.</td><td>${qtdDIO * 2}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeija de emenda (12 fibras)</td><td>Unid.</td><td>${qtdDIO * 4}</td></tr>
                 <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Protetores de emenda</td><td>Unid.</td><td>${numPavimentosBackbone * fibras}</td></tr>
                 ${backbonePrimarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Primário</td><td>PigTail (${padraoTransmissaoPrimario.padraoTransmissao}), (${padraoTransmissaoPrimario.nucleo}x125µm), (simples), (LC), (2m), (cor)</td><td>Unid.</td><td>${fibras}</td></tr>` : ``}
                 ${backbonePrimarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Primário</td><td>Acoplador óptico (${padraoTransmissaoPrimario.padraoTransmissao}), (${padraoTransmissaoPrimario.nucleo}x125µm), (duplo), (LC), (cor)</td><td>Unid.</td><td>${fibras/2}</td></tr>` : ``}
@@ -118,15 +119,16 @@ function calcular() {
                 ${backboneSecundarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Secundario</td><td>PigTail (${padraoTransmissaoSecundario.padraoTransmissao}), (${padraoTransmissaoSecundario.nucleo}x125µm), (simples), (LC), (2m), (cor)</td><td>Unid.</td><td>${numPavimentosBackbone * fibras}</td></tr>` : ``}
                 ${backboneSecundarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Secundario</td><td>Acoplador óptico (${padraoTransmissaoSecundario.padraoTransmissao}), (${padraoTransmissaoSecundario.nucleo}x125µm), (simples), (LC), (2m), (cor)</td><td>Unid.</td><td>${numPavimentosBackbone * fibras/2}</td></tr>` : ``}
                 ${backboneSecundarioSim ? `<tr><td>Sala de Equipamentos/Telecom - Backbone Secundario</td><td>Cordão óptico (${padraoTransmissaoSecundario.padraoTransmissao}), (${padraoTransmissaoSecundario.nucleo}x125µm), (simples), (LC), (2m), (cor)</td><td>Unid.</td><td>${numPavimentosBackbone * fibras/2}</td></tr>` : ``}
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Terminador Óptico (8 fibras)</td><td>Unid.</td><td>${Math.ceil(fibras / 8) * numPavimentosBackbone}</td></tr>
+                ${numPavimentosBackbone > 1 ? `<tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Terminador Óptico (8 fibras)</td><td>Unid.</td><td>${qtdTO * numPavimentosBackbone}</td></tr>` : ``}
                 ${tipoFibraPrimario === 'MM' ? `<tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (MM), (${padraoTransmissaoPrimario.nucleo}x125µm), (Loose), (${fibras} fibras)</td><td>m</td><td>${Math.ceil(distanciaEdificios * 1.1)}</td></tr>`: ``}
                 ${tipoFibraPrimario === 'SM' ? `<tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (SM), (${padraoTransmissaoPrimario.nucleo}x125µm), (Loose), (${fibras} fibras)</td><td>m</td><td>${Math.ceil(distanciaEdificios * 1.1)}</td></tr>`: ``}
                 ${tipoFibraSecundario === 'MM' ? `<tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (MM), (${padraoTransmissaoSecundario.nucleo}x125µm), (Tight Buffer), (${fibras} fibras)</td><td>m</td><td>${Math.ceil((alturaAndares * numPavimentosBackbone)* 1.1)}</td></tr>`: ``}
                 ${tipoFibraSecundario === 'SM' ? `<tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Cabo Óptico (SM), (${padraoTransmissaoSecundario.nucleo}x125µm), (Tight Buffer), (${fibras} fibras)</td><td>m</td><td>${Math.ceil((alturaAndares * numPavimentosBackbone)* 1.1)}</td></tr>`: ``}
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Rack (Aberto), (Tamanho: ${infoRackBB.tamanhoRack}U)</td><td>Unid.</td><td>${infoRackBB.quantidadeRacks * numPavimentosBackbone}</td></tr>
-                tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Organizador lateral para Rack ${infoRackBB.tamanhoRack}U</td><td>Unid.</td><td>${infoRack.quantidadeRacks * 2 * numPavimentosBackbone}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Rack (Aberto), (Tamanho: ${infoRackBB.tamanhoRackTO}U)</td><td>Unid.</td><td>${infoRackBB.quantidadeRacks * numPavimentosBackbone}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Organizador lateral para Rack ${infoRackBB.tamanhoRackTO}U</td><td>Unid.</td><td>${infoRack.quantidadeRacks * 2 * numPavimentosBackbone}</td></tr>
                 <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Bandeja fixa - 19" de largura (1U de bandeja + 3U de espaço)</td><td>Unid.</td><td>${infoRackBB.quantidadeRacks * numPavimentosBackbone}</td></tr>
-                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>${Math.ceil(infoRackBB.tamanhoRack * 4 / 10) * numPavimentosBackbone}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom (SEQ/SET)</td><td>Bandeja deslizante - 19" de largura (TO + Bandeja = 1U)</td><td>Unid.</td><td>${qtdTO * numPavimentosBackbone}</td></tr>
+                <tr><td>Sala de Equipamentos/Telecom - Backbone</td><td>Parafuso Porca Gaiola (conjunto com 10 unidades)</td><td>Conj.</td><td>${Math.ceil(infoRackBB.tamanhoRackTO * 4 / 10) * numPavimentosBackbone}</td></tr>
                 <tr><td>Miscelânea</td><td>Abraçadeira de velcro</td><td>m</td><td>${infoRackBB.quantidadeRacks * 3 * numPavimentosBackbone}</td></tr>
                 <tr><td>Miscelânea</td><td>Abraçadeira Hellermann (conjunto com 100 unidades)</td><td>Conj.</td><td>${infoRackBB.quantidadeRacks * numPavimentosBackbone}</td></tr>
                 <tr><td>Miscelânea</td><td>Filtro de linha com 08 tomadas</td><td>Unid.</td><td>${infoRackBB.quantidadeRacks * 2 * numPavimentosBackbone}</td></tr>
@@ -231,11 +233,9 @@ function novaPlanilha() {
 }
 
 // Função para calcular tamanho do Rack e quantidade de Racks de malha horizontal
-function calcularRack(qtdPPMH, numPavimentos) {
-    qtdPPMH /= numPavimentos;
-    
+function calcularRack(qtdPPMHAndar) {
     // Calcula o tamanho do rack
-    const tamanhoRack = ((qtdPPMH * 2) * 2 + 4) * 1.5;
+    const tamanhoRack = ((qtdPPMHAndar * 2) * 2 + 4) * 1.5;
 
     // Define os limites e incrementos para o tamanho do rack
     const tamanhoMinimo = 6;
@@ -268,36 +268,32 @@ function calcularRack(qtdPPMH, numPavimentos) {
 }
 
 // Função para calcular tamanho do Rack e quantidade de Racks de backbone
-function calcularRackBB(qtdDIO) {
+function calcularRackBB(qtdDIO, qtdTO) {
     // Calcula o tamanho do rack
-    const tamanhoRack = ((qtdDIO * 2) * 2 + 4) * 1.5;
+    let qtdSwitch = qtdTO;
+    const tamanhoRackDIO = ((qtdDIO * 2) * 2 + 4) * 1.5;
+    const tamanhoRackTO = (qtdTO + (qtdSwitch * 2) + 4) * 1.5;
 
     // Define os limites e incrementos para o tamanho do rack
-    const tamanhoMinimo = 6;
     const tamanhoMaximo = 48;
-    const incrementoMenor = 2;
-    const incrementoMaior = 4;
 
-    let tamanhoRackValido;
     let quantidadeRacks = 1;
 
-    if (tamanhoRack > tamanhoMaximo) {
-        // Se o tamanho exceder o máximo permitido, divida em múltiplos racks
-        quantidadeRacks = Math.ceil(tamanhoRack / tamanhoMaximo);
-        tamanhoRackValido = tamanhoMaximo;
+    if (tamanhoRackDIO > tamanhoMaximo) {
+        quantidadeRacks = Math.ceil(tamanhoRackDIO / tamanhoMaximo);
     } else {
-        // Determina o tamanho válido para racks
-        if (tamanhoRack <= 12) {
-            tamanhoRackValido = Math.max(tamanhoMinimo, Math.ceil(tamanhoRack / incrementoMenor) * incrementoMenor);
-        } else {
-            tamanhoRackValido = Math.max(12, Math.ceil((tamanhoRack - 12) / incrementoMaior) * incrementoMaior + 12);
-        }
-        
         quantidadeRacks = 1;
     }
 
+    if (tamanhoRackTO > tamanhoMaximo) {
+        quantidadeRacks += Math.ceil(tamanhoRackTO / tamanhoMaximo);
+    } else {
+        quantidadeRacks += 1;
+    }
+
     return {
-        tamanhoRack: tamanhoRack,
+        tamanhoRackDIO: tamanhoRackDIO,
+        tamanhoRackTO: tamanhoRackTO,
         quantidadeRacks: quantidadeRacks
     };
 }
